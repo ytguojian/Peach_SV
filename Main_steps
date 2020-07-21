@@ -1,0 +1,66 @@
+####1 LUMPY
+run_extract_discordants__read: bsub -q normal -o /workspace/hrajxg/bioinf_Prunus_ZFRI/04_lumpy/.log/1001.log -e /workspace/hrajxg/bioinf_Prunus_ZFRI/04_lumpy/.log/1001.err -J 1001  "module load samtools/1.3.1; cd $inputDir; samtools view -b -F 1294 1001.unsorted.bam -o $baseDir/1001.discordants.unsorted.bam "
+run_extract__split_read: bsub -q lowpriority -o /workspace/hrajxg/bioinf_Prunus_ZFRI/04_lumpy/.logs/1001.log -e /workspace/hrajxg/bioinf_Prunus_ZFRI/04_lumpy/.logs/1001.err -J 1001  "module load samtools/1.3.1; cd $inputDir; samtools view -h 1001.sorted.bam | /workspace/hrajxg/software/lumpy-sv-v0.2.13/scripts/extractSplitReads_BwaMem -i stdin | samtools view -Sb > $baseDir/1001.splitterss.unsorted.bam "
+produce_lib1.histo: bsub -q normal -o /workspace/hrajxg/bioinf_Prunus_ZFRI/04_lumpy/.loglib/1001.log -e /workspace/hrajxg/bioinf_Prunus_ZFRI/04_lumpy/.loglib/1001.err -J 1001  "module load samtools; module load pfr-python2/2.7.13; samtools view /workspace/hrajxg/bioinf_Prunus_ZFRI/03_samtools/creat_sort_bam/1001.sorted.bam | tail -n+10000 | /workspace/hrajxg/software/lumpy-sv-v0.2.13/scripts/pairend_distro.py -r 150 -X 4 -N 10000 -o /workspace/hrajxg/bioinf_Prunus_ZFRI/04_lumpy/1001.lib1.histo "
+sort_both_alignments : bsub -q lowpriority -o /workspace/hrajxg/bioinf_Prunus_ZFRI/04_lumpy/.log.ds/1001.log -e /workspace/hrajxg/bioinf_Prunus_ZFRI/04_lumpy/.log.ds/1001.err -J 1001  "module load samtools/1.3.1; cd $inputDir; samtools sort 1001.discordants.unsorted.bam -o $baseDir/1001.discordants.sorted.bam "
+bsub -q normal -o /workspace/hrajxg/bioinf_Prunus_ZFRI/04_lumpy/.logss/1001.log -e /workspace/hrajxg/bioinf_Prunus_ZFRI/04_lumpy/.logss/1001.err -J 1001  "module load samtools/1.3.1; cd $inputDir; samtools sort 1001.splitterss.unsorted.bam -o $baseDir/1001.splitters.sorted.bam "
+
+run_lumpyexpress: bsub -q normal -o /workspace/hrajxg/bioinf_Prunus_ZFRI/04_lumpy/vcf_express/.logexpressvcf/1001.log -e /workspace/hrajxg/bioinf_Prunus_ZFRI/04_lumpy/vcf_express/.logexpressvcf/1001.err -J 1001  "cd $inputDir; /workspace/hrajxg/software/lumpy-sv-v0.2.13/bin/lumpyexpress -P -B /workspace/hrajxg/bioinf_Prunus_ZFRI/03_samtools/creat_sort_bam/1001.sorted.bam -S /workspace/hrajxg/bioinf_Prunus_ZFRI/04_lumpy/1001.splitters.sorted.bam -D /workspace/hrajxg/bioinf_Prunus_ZFRI/04_lumpy/1001.discordants.sorted.bam -o /workspace/hrajxg/bioinf_Prunus_ZFRI/04_lumpy/vcf_express/1001.vcf  "
+run_SVTyper_lumpyexpress: bsub -q normal -n 2 -o /workspace/hrajxg/bioinf_Prunus_ZFRI/05_svtyper/genotype_lumpyexpress/.log/1001.log -e /workspace/hrajxg/bioinf_Prunus_ZFRI/05_svtyper/genotype_lumpyexpress/.log/1001.err -J 1001  "module load pfr-python2/2.7.13; cd $inputDir; /workspace/hrajxg/software/bin/svtyper -B /workspace/hrajxg/bioinf_Prunus_ZFRI/03_samtools/creat_sort_bam/1001.sorted.bam -i 1001.vcf > /workspace/hrajxg/bioinf_Prunus_ZFRI/05_svtyper/genotype_lumpyexpress/1001.gt.vcf "
+Filter : svfilter.pl (DEL le 340 need SR supports)
+#2 Gridss
+bsub -q normal -o /workspace/hrajxg/bioinf_Prunus_ZFRI/08_gridss/.log/1001.log -e /workspace/hrajxg/bioinf_Prunus_ZFRI/08_gridss/.log/1001.err -J 1001  "module load samtools; module load bwa; module load R; cd /workspace/hrajxg/bioinf_Prunus_ZFRI/08_gridss/working/; java -ea -Xmx8g -Dsamjdk.create_index=true -Dsamjdk.use_async_io_read_samtools=true -Dsamjdk.use_async_io_write_samtools=true -Dsamjdk.use_async_io_write_tribble=true -Dgridss.gridss.output_to_temp_file=true -cp /workspace/hrajxg/software/gridss-1.5.0/gridss-1.5.0-jar-with-dependencies.jar gridss.CallVariants TMP_DIR=. WORKING_DIR=. REFERENCE_SEQUENCE=/workspace/hrajxg/bioinf_Prunus_ZFRI/reference/Prunus_persica_v2.0.a1_scaffolds.fasta INPUT=/workspace/hrajxg/bioinf_Prunus_ZFRI/06_picard//1001.sorted.dedup.bam OUTPUT=/workspace/hrajxg/bioinf_Prunus_ZFRI/08_gridss/vcf/1001.sv.vcf ASSEMBLY=/workspace/hrajxg/bioinf_Prunus_ZFRI/08_gridss/1001.gridss.assembly.bam 2>&1 | tee -a gridss.aklppr31.pfr.co.nz.4096.log"
+bsub -q normal -o /workspace/hrajxg/bioinf_Prunus_ZFRI/08_gridss/vcf/sortvcf/.log/1001.R.log -e /workspace/hrajxg/bioinf_Prunus_ZFRI/08_gridss/vcf/sortvcf/.log/1001.R.err -J R.1001 "/workspace/hrajxg/software/R-3.4.3/bin/Rscript 1001.run.R"
+1001.run.R(           #source("https://bioconductor.org/biocLite.R")
+#biocLite("VariantAnnotation")
+#install_github("PapenfussLab/StructuralVariantAnnotation")
+#install.packages("stringr")
+library(VariantAnnotation)
+library(StructuralVariantAnnotation)
+library(stringr)
+#' Simple SV type classifier
+simpleEventType <- function(gr) {
+  return(ifelse(seqnames(gr) != seqnames(partner(gr)), "ITX", # inter-chromosomosal
+          ifelse(gr$insLen >= abs(gr$svLen) * 0.7, "INS", # TODO: improve classification of complex events
+           ifelse(strand(gr) == strand(partner(gr)), "INV",
+            ifelse(xor(start(gr) < start(partner(gr)), strand(gr) == "-"), "DEL",
+             "DUP")))))
+}
+# using the example in the GRIDSS /example directory
+vcf <- readVcf("1001.sorted.vcf", "Prunus")
+gr <- breakpointRanges(vcf)
+svtype <- simpleEventType(gr)
+info(vcf)$SIMPLE_TYPE <- NA_character_
+info(vcf[gr$vcfId])$SIMPLE_TYPE <- svtype
+info(vcf[gr$vcfId])$SVLEN <- gr$svLen
+writeVcf(vcf, "1001.sv.annotated.vcf")           )
+
+####3 Manta (runstep12.pl)
+1bsub -q normal -o /workspace/hrajxg/bioinf_Prunus_ZFRI/010_manta/1001.sorted.dedup.bam/.log/step1.log -e /workspace/hrajxg/bioinf_Prunus_ZFRI/010_manta/1001.sorted.dedup.bam/.log/step1.err -J 1001.sorted.dedup.bam " /workspace/hrajxg/software/manta-1.3.0.centos6_x86_64/bin/configManta.py --bam /workspace/hrajxg/bioinf_Prunus_ZFRI/06_picard/1001.sorted.dedup.bam  --referenceFasta /workspace/hrajxg/bioinf_Prunus_ZFRI/reference/Prunus_persica_v2.0.a1_scaffolds.fasta --runDir /workspace/hrajxg/bioinf_Prunus_ZFRI/010_manta/1001.sorted.dedup.bam"
+2bsub -q normal -o /workspace/hrajxg/bioinf_Prunus_ZFRI/010_manta/1001.sorted.dedup.bam/.log/step2.log -e /workspace/hrajxg/bioinf_Prunus_ZFRI/010_manta/1001.sorted.dedup.bam/.log/step2.err -J 1001.sorted.dedup.bam.2 "cd /workspace/hrajxg/bioinf_Prunus_ZFRI/010_manta/1001.sorted.dedup.bam; module load  pfr-python2/2.7.13; python runWorkflow.py -m local -j 8 "
+Delly
+1bsub -q normal -n 2 -o /workspace/hrajxg/bioinf_Prunus_ZFRI/012_delly/.log/1001.log -e /workspace/hrajxg/bioinf_Prunus_ZFRI/012_delly/.log/1001.err -J 1001.delly  "cd /workspace/hrajxg/bioinf_Prunus_ZFRI/06_picard; delly call -g /workspace/hrajxg/bioinf_Prunus_ZFRI/reference/Prunus_persica_v2.0.a1_scaffolds.fasta -o /workspace/hrajxg/bioinf_Prunus_ZFRI/012_delly/1001.vcf 1001.sorted.dedup.bam"
+2bsub -q normal -n 3 -o /workspace/hrajxg/bioinf_Prunus_ZFRI/012_delly/.log/dellymerge.log -e /workspace/hrajxg/bioinf_Prunus_ZFRI/012_delly/.log/dellymerge.err -J dellymerge " delly merge -o all357.dellymerge.bcf 1001.vcf 1002.vcf…….”
+3recall : bsub -q normal -n 2 -o /workspace/hrajxg/bioinf_Prunus_ZFRI/012_delly/.log/1001.recall.log -e /workspace/hrajxg/bioinf_Prunus_ZFRI/012_delly/.log/1001.recall.err -J 1001.delly  "cd /workspace/hrajxg/bioinf_Prunus_ZFRI/012_delly; delly call -g /workspace/hrajxg/bioinf_Prunus_ZFRI/reference/Prunus_persica_v2.0.a1_scaffolds.fasta -v all357.dellymerge.bcf -o /workspace/hrajxg/bioinf_Prunus_ZFRI/012_delly/1001.recall.vcf /workspace/hrajxg/bioinf_Prunus_ZFRI/06_picard/1001.sorted.dedup.bam"
+
+####4 SURVIVOR
+Note: it is better to be sorted : bsub -q normal -J 1001 "module load java/1.8.0; java -jar /software/bioinformatics/picard-tools-2.10.1/picard.jar SortVcf SD=/workspace/hrajxg/bioinf_Prunus_ZFRI/04_lumpy/vcf_file/Prunus_persica_v2.0.a1_scaffolds.fasta.dict I=1001.suvivor50.merge.vcf O=1001.sort.suvivor50.merge.vcf"
+1filter : fil.startgt5k.pl fil.NA.pl filt_vcf.pl (DEL DUP le 500K)
+2merge the four caller for each sample : SURVIVOR merge 1001.name 1000 2 1 1 0 50 1001.suvivor50.merge.vcf
+3merge the 336 samples (SURVIVOR merge suvivor50.merge.sort.vcf.name.2 1000 1 1 1 0 50 all.merge.vcf )
+4regenotype the file for each sample except ins and tra : bsub -q normal -n 2 -o ./.log/1001.log -e ./.log/1001.err -J GT1001 "module load pfr-python2/2.7.13; /workspace/hrajxg/software/svtyper-0.1.3/svtyper -B /workspace/hrajxg/bioinf_Prunus_ZFRI/03_samtools/creat_sort_bam/1001.sorted.bam -i all.336.survivor.vcf -o 1001.gt.vcf"
+5run.bcfmerge.sh
+6Finally, we get all.336.final.sort.vcf
+#####5 TE--panISa
+1run.panIS.sh: bsub -q normal -o ./.log/1.log -e ./.log/1.err -J is "module load pfr-python2/2.7.13; python /workspace/hrajxg/software/panISa/panISa.py -o 1.TE -s 10 -q 30 -m 2 /workspace/hrajxg/bioinf_Prunus_ZFRI/03_samtools/creat_sort_bam/1.sorted.bam"
+2run.filDR.sh : DR >1
+3fil.depth2.pl : Any TEs that have ge 5 & le 30 End clipped reads or Start clipped reads and also have a position depth le 50 were kept ;and genotype according to the depth of TE position by comparing the cliped reads count and position depth;
+4make.vcf.pl
+5SURVOVIR : all.TE.336.vcf
+
+SV—GWAS—gapit
+1merge SV TE INDEL : SV >50 INDEL <50
+Firstly, change their format to such of SNP.vcf using convert_format.pl
+2change.comm.pl :because there might be the same pos in the three files
+3get GM GD files by ham2numeric.pl and awk
+4run.gapit.R 
