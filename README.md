@@ -5,3 +5,9 @@
 #The main_steps file included the process.
 
 #The required scripts were also deposited as XXX.pl
+
+##Contact
+
+#WeChat：ytguojian
+
+#E-mail：ytguojian@163.com
