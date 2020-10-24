@@ -48,7 +48,7 @@ Note: it is better to be sorted : bsub -q normal -J 1001 "module load java/1.8.0
 1filter :  filt_vcf.pl (DEL DUP le 500K)
 2merge the four caller for each sample : SURVIVOR merge 1001.name 1000 2 1 1 0 50 1001.suvivor50.merge.vcf
 3merge the 336 samples (SURVIVOR merge suvivor50.merge.sort.vcf.name.2 1000 1 1 1 0 50 all.merge.vcf )
-4regenotype the file for each sample except ins and tra : bsub -q normal -n 2 -o ./.log/1001.log -e ./.log/1001.err -J GT1001 "module load pfr-python2/2.7.13; /workspace/hrajxg/software/svtyper-0.1.3/svtyper -B /workspace/hrajxg/bioinf_Prunus_ZFRI/03_samtools/creat_sort_bam/1001.sorted.bam -i all.336.survivor.vcf -o 1001.gt.vcf"
+4（optional）regenotype the file for each sample except ins and tra : bsub -q normal -n 2 -o ./.log/1001.log -e ./.log/1001.err -J GT1001 "module load pfr-python2/2.7.13; /workspace/hrajxg/software/svtyper-0.1.3/svtyper -B /workspace/hrajxg/bioinf_Prunus_ZFRI/03_samtools/creat_sort_bam/1001.sorted.bam -i all.336.survivor.vcf -o 1001.gt.vcf"
 5run.bcfmerge.sh
 6Finally, we get all.336.final.sort.vcf
 #####5 TE--panISa
